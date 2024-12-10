@@ -1,246 +1,141 @@
-; Mohanad S. Hamed
+.MODEL SMALL
+.STACK 100H
+.DATA
+    BALL_X_INITIAL_POS DW 0AH
+    BALL_Y_INITIAL_POS DW 0AH
+    BALL_X DW 0AH
+    BALL_Y DW 0AH
+    BALL_SIZE DW 04H; 4x4
 
-;***********************Utility Macros*************************
-; Assign variable b to a
-Assign macro a, b
-    mov ax, [b]
-    mov [a], ax    
-endm
+    BALL_X_VELOCITY DW 5H
+    BALL_Y_VELOCITY DW 2H
 
-;a = -a 
-Negate macro a
-    mov ax, [a]
-    neg ax
-    mov [a], ax    
-endm
+    WINDOW_HEIGHT DW 200
+    WINDOW_WIDTH DW 320
+    WINDOW_BOUNDS DW 6; To Check Boundaries Early
 
-;a = a+1 
-IncVar macro a
-    mov ax, [a]
-    inc ax
-    mov [a], ax    
-endm
+    BALL_CENTER_X DW 110
+    BALL_CENTER_Y DW 160
 
-;a = a-1 
-DecVar macro a
-    mov ax, [a]
-    dec ax
-    mov [a], ax    
-endm
+    AUX_TIME DB 0
+.CODE
 
-Compare2Variables macro a, b
-    mov cx, [a]
-    cmp cx, [b]
-endm
+    INIT_GRAPHICS_MODE PROC FAR
+        MOV AX, 13H
+        INT 10H
+        RET
+    INIT_GRAPHICS_MODE ENDP
 
-CompareVariableAndNumber macro a, b
-    mov cx, [a]
-    cmp cx, b
-endm
+    SET_BACK_GROUND_CLR PROC FAR
+        MOV AH, 0BH
+        MOV BX, 00H
+        INT 10H
+        RET
+    SET_BACK_GROUND_CLR ENDP
 
-;c = a+b
-AddAndAssign macro c, a, b
-    mov ax, [a]
-    add ax, [b]
-    mov [c], ax
-endm 
+    DRAW_BALL PROC FAR
+        MOV CX, BALL_X
+        MOV DX, BALL_Y
+        MOV AL, 04H; WHITE COLOR
+        MOV AH, 0CH
+        MOV BH, 0
 
-;c = a-b
-SubAndAssign macro c, a, b
-    mov ax, [a]
-    sub ax, [b]
-    mov [c], ax
-endm
+    DRAW_BALL_LOOP:
+        INT 10H
+        INC CX
+        ;SI IS TEMP TO COMPARE WITH BALL_Y + BALL_SIZE
+        MOV SI, BALL_X
+        ADD SI, BALL_SIZE
+        CMP CX, SI
+        JNE DRAW_BALL_LOOP
 
-;d = a+b+c
-Add3NumbersAndAssign macro d, a, b, c
-    mov ax, [a]
-    add ax, [b]
-    add ax, [c]
-    mov [d], ax
-endm 
+        INC DX
+        MOV CX, BALL_X
 
-;d = a-b-c
-Sub3NumbersAndAssign macro d, a, b, c
-    mov ax, [a]
-    sub ax, [b]
-    sub ax, [c]
-    mov [d], ax
-endm
+        MOV SI, BALL_Y
+        ADD SI, BALL_SIZE
 
-DrawPixel macro x, y
+        CMP DX, SI
+        JNE DRAW_BALL_LOOP
+
+        RET
+    DRAW_BALL ENDP
+
+MOVE_BALL_BY_VELOCITY PROC FAR
+    MOV AX, BALL_X_VELOCITY
+    ADD BALL_X, AX
     
-    mov cx, [x]  ; column  
-    mov dx, [y]  ; row  
-     
-    mov al, 4  ; green
-    mov ah, 0ch ; put pixel
-    int 10h     
-endm
-;***********************End Utility Macros*************************
+    ;ball_x < 0 or ball_x > window_width  - BALL_SIZE
+    MOV AX, WINDOW_BOUNDS
+    CMP BALL_X, AX
+    JL NEG_VEL_X
+
+    MOV AX, WINDOW_WIDTH
+    SUB AX, WINDOW_BOUNDS
+    CMP BALL_X, AX
+    JG NEG_VEL_X
 
 
-;***********************Draw Circle Macro*************************
-DrawCircle macro circleCenterX, circleCenterY, radius
-    ;C# Code
-;         int balance;
-;         int xoff;
-;         int yoff;
-    balance dw 0
-    xoff dw 0
-    yoff dw 0 
-    
-    xplusx dw 0
-    xminusx dw 0
-    yplusy dw 0
-    yminusy dw 0
-    
-    xplusy dw 0
-    xminusy dw 0
-    yplusx dw 0
-    yminusx dw 0
-    
-    
-    ;C# Code
-    ;         xoff = 0;
-    ;         yoff = radius;
-    ;         balance = -radius;
-    
-    Assign yoff, radius
-    
-    Assign balance, radius
-    Negate balance
-    
-    
-    ;C# Code
-    ;         while (xoff <= yoff)
-    ;         {
-    draw_circle_loop:
-     
-     AddAndAssign xplusx, circleCenterX, xoff
-     SubAndAssign xminusx, circleCenterX, xoff
-     AddAndAssign yplusy, circleCenterY, yoff
-     SubAndAssign yminusy, circleCenterY, yoff
-     
-     AddAndAssign xplusy, circleCenterX, yoff
-     SubAndAssign xminusy, circleCenterX, yoff
-     AddAndAssign yplusx, circleCenterY, xoff
-     SubAndAssign yminusx, circleCenterY, xoff
-     
-    ;C# Code
-    ;        DrawPixel(circleCenterX + yoff, circleCenterY - xoff);
-    ; part 1 from angle 0 to 45 counterclockwise
-    DrawPixel xplusy, yminusx
-    
-    ;C# Code
-    ;       DrawPixel(circleCenterX + xoff, circleCenterY - yoff);
-    ; part 2 from angle 90 to 45 clockwise
-    DrawPixel xplusx, yminusy
-    
-    ;C# Code
-    ;       DrawPixel(circleCenterX - xoff, circleCenterY - yoff); 
-    ; part 3 from angle 90 to 135 counterclockwise
-    DrawPixel xminusx, yminusy
-    
-    ;C# Code
-    ;        DrawPixel(circleCenterX - yoff, circleCenterY - xoff); 
-    ; part 4 from angle 180 to 135 clockwise
-    DrawPixel xminusy, yminusx
-    
-    ;C# Code
-    ;       DrawPixel(circleCenterX - yoff, circleCenterY + xoff); 
-    ; part 5 from angle 180 to 225 counterclockwise
-    DrawPixel xminusy, yplusx
-    
-        ;C# Code
-    ;       DrawPixel(circleCenterX - xoff, circleCenterY + yoff); 
-    ; part 6 from angle 270 to 225 clockwise
-    DrawPixel xminusx, yplusy
-        
-    ;C# Code
-    ;       DrawPixel(circleCenterX + xoff, circleCenterY + yoff); 
-    ; part 7 from angle 270 to 315 counterclockwise
-    DrawPixel xplusx, yplusy
-    
-    
-    ;C# Code
-    ;       DrawPixel(circleCenterX + yoff, circleCenterY + xoff); 
-    ; part 8 from angle 360 to 315 clockwise
-    DrawPixel xplusy, yplusx
 
-    
-    ;C# Code
-    ;        balance = balance + xoff + xoff;
-    Add3NumbersAndAssign balance, balance, xoff, xoff
-    
-    ;C# Code
-    ;            if (balance >= 0)
-    ;            {
-    ; 
-    ;               yoff = yoff - 1;
-    ;               balance = balance - yoff - yoff;
-    ;               
-    ;            }
-    ; 
-    ;            xoff = xoff + 1;
-    CompareVariableAndNumber balance, 0
-    jl balance_negative
-    ;balance_positive:
-    DecVar yoff
-    
-    Sub3NumbersAndAssign balance, balance, yoff, yoff
-    
-    balance_negative:
-    IncVar xoff
-    
-    ;C# Code
-    ;         while (xoff <= yoff)
-    Compare2Variables xoff, yoff
-    jg end_drawing
-    jmp draw_circle_loop
-    
-    
-    end_drawing:
-    ; pause the screen for dos compatibility:    
-endm
-;***********************End Draw Circle Macro*************************
+    MOV AX, BALL_Y_VELOCITY
+    ADD BALL_Y, AX
 
-.model small
-.stack 100h
-.data
-org  100h
-.code
-main proc far
-;***********************Main*************************
+    MOV AX, WINDOW_BOUNDS
+    CMP BALL_Y, AX
+    JL NEG_VEL_Y
 
-mov ah, 0   ; set display mode function.
-mov al, 13h ; mode 13h = 320x200 pixels, 256 colors.
-int 10h     ; set it!
+    MOV AX, WINDOW_HEIGHT
+    SUB AX, WINDOW_BOUNDS
+    CMP BALL_Y, AX
+    JG NEG_VEL_Y
+
+    RET
+
+NEG_VEL_X:
+    NEG BALL_X_VELOCITY
+    RET
+
+NEG_VEL_Y:
+    NEG BALL_Y_VELOCITY
+    RET
+
+MOVE_BALL_BY_VELOCITY ENDP
 
 
-;C# Code
-;         int circleCenterX = 40;
-;         int circleCenterY = 40;
-;         int radius = 20;
-         
-x dw 200 ; center x
-y dw 80 ; center y
-r dw 2 ; radius
-
-DrawCircle x, y, r
-
-;wait for keypress
-  mov ah,00
-  int 16h			
-
-; return to text mode:
-  mov ah,00 ; set display mode function.
-  mov al,03 ; normal text mode 3
-  int 10h   ; set it!
+; RESET_BALL PROC FAR
+;     MOV BALL_X, BALL_X_INITIAL_POS
+;     MOV BALL_Y, BALL_Y_INITIAL_POS
+;     RET
+; RESET_BALL ENDP
 
 
-; ret 
+MAIN PROC FAR
 
-main endp
-end main
-;***********************End Main*************************
+    MOV AX, @DATA
+    MOV DS, AX
+
+    CALL INIT_GRAPHICS_MODE
+    CALL SET_BACK_GROUND_CLR
+
+
+    ;GET TIME CH Hours, CL Minutes, DH Seconds, DL Hundreths of a second
+    CHECK_TIME:
+        MOV AH, 2CH
+        INT 21H
+    
+        CMP DL, AUX_TIME
+        JE CHECK_TIME
+    
+        MOV AUX_TIME, DL
+
+        CALL INIT_GRAPHICS_MODE
+        CALL MOVE_BALL_BY_VELOCITY
+        CALL DRAW_BALL
+    
+        JMP CHECK_TIME
+
+
+    HLT
+MAIN ENDP
+END MAIN
+
