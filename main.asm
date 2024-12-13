@@ -5,18 +5,21 @@
 AUX_TIME DB 0
 .code
 
-INIT_GRAPHICS_MODE PROC NEAR
-    MOV   AX, 13H
-    INT   10H
-    RET
-INIT_GRAPHICS_MODE ENDP
+INIT_APP PROC NEAR
+    ; Set video mode 13h (320x200, 256 colors)
+    mov ax, 0013h ; Set video mode 13h
+    int 10h       ; Call BIOS interrupt
 
-SET_BACK_GROUND_CLR PROC NEAR
-    MOV   AH, 0BH
-    MOV   BX, 00H
-    INT   10H
+    ; Clear the screen (fill video memory with 0)
+    mov       ax, 0A000h ; Video memory segment address
+    mov       es, ax     ; ES = video memory
+    xor       di, di     ; Starting offset in video memory
+    mov       cx, 32000  ; 320x200 pixels, 1 byte per pixel
+    mov       al, 00h    ; Black color (0)
+    rep stosb            ; Clear the screen
+    
     RET
-SET_BACK_GROUND_CLR ENDP
+ENDP INIT_APP
 
     EXTRN DRAWBLOCKS:FAR
     EXTRN DRAW_BALL:FAR
@@ -29,8 +32,7 @@ main PROC
     MOV   AX, @DATA
     MOV   DS, AX
 
-    CALL  INIT_GRAPHICS_MODE
-    CALL  SET_BACK_GROUND_CLR
+    CALL  INIT_APP
     CALL  DRAWBLOCKS
 
 
