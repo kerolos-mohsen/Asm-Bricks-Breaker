@@ -1,63 +1,73 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"label": "Assemble with TASM in DOSBox",
-			"type": "shell",
-			"command": "C:\\Program Files (x86)\\DOSBox-0.74-3\\DOSBox.exe",
-			"args": [
-				"-c",
-				"mount C ${cwd}", // Mount current working directory
-				"-c",
-				"set PATH=%PATH%;C:/8086",
-				"-c",
-				"C:", // Switch to the C: drive
-				"-c",
-				"TASM.EXE *.asm /m2", // Assemble all .asm files into .obj files
-				"-c",
-				"LINK.EXE main.obj blocks.obj ball.obj paddle.obj;", // Link all .obj files to create an executable
-				"-c",
-				"copy *.obj output.bin", // Combine all .obj files into a single .bin file
-				"-c",
-				"copy main.exe output.bin", // Append the .exe file to the .bin file
-				"-c",
-				"DEL *.obj", // Delete all .obj files
-				"-c",
-				"DEL output.bin", // Delete the temporary .bin file
-				"-c",
-				"main.exe", // Exit DOSBox
-				"-c",
-				"DEL main.exe", // Delete the .exe file
-				"-c",
-				"exit" // Exit DOSBox
-			],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
-			"problemMatcher": []
-		},
-		{
-			"label": "Try Compiling .asm Files",
-			"type": "shell",
-			"command": "C:\\Program Files (x86)\\DOSBox-0.74-3\\DOSBox.exe",
-			"args": [
-				"-c",
-				"mount C ${cwd}", // Mount current working directory
-				"-c",
-				"set PATH=%PATH%;C:/8086",
-				"-c",
-				"C:", // Switch to the C: drive
-				"-c",
-				"TASM.EXE *.asm /m2", // Assemble all .asm files into .obj files
-				"-c",
-				"LINK.EXE main.obj blocks.obj ball.obj paddle.obj;" // Link all .obj files to create an executable
-			],
-			"group": {
-				"kind": "test",
-				"isDefault": false
-			},
-			"problemMatcher": []
-		}
-	]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Assemble with TASM in DOSBox",
+      "type": "shell",
+      "windows": {
+        "command": "C:\\Program Files (x86)\\DOSBox-0.74-3\\DOSBox.exe"
+      },
+      "linux": {
+        "command": "dosbox-x"
+      },
+      "args": [
+        "-c",
+        "mount C ${cwd}", // Mount current working directory
+        "-c",
+        "set PATH=%PATH%;C:/8086",
+        "-c",
+        "C:", // Switch to the C: drive
+        "-c",
+        "TASM.EXE *.asm /m2", // Assemble all .asm files into .obj files
+        "-c",
+        "LINK.EXE main.obj blocks.obj ball.obj paddle.obj;", // Link all .obj files to create an executable
+        "-c",
+        "copy *.obj output.bin", // Combine all .obj files into a single .bin file
+        "-c",
+        "copy main.exe output.bin", // Append the .exe file to the .bin file
+        "-c",
+        "DEL *.obj", // Delete all .obj files
+        "-c",
+        "DEL output.bin", // Delete the temporary .bin file
+        "-c",
+        "main.exe", // Exit DOSBox
+        "-c",
+        "DEL main.exe", // Delete the .exe file
+        "-c",
+        "exit" // Exit DOSBox
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Try Compiling .asm Files",
+      "type": "shell",
+      "windows": {
+        "command": "C:\\Program Files (x86)\\DOSBox-0.74-3\\DOSBox.exe"
+      },
+      "linux": {
+        "command": "dosbox-x"
+      },
+      "args": [
+        "-c",
+        "mount C ${cwd}", // Mount current working directory
+        "-c",
+        "set PATH=%PATH%;C:/8086",
+        "-c",
+        "C:", // Switch to the C: drive
+        "-c",
+        "TASM.EXE *.asm /m2", // Assemble all .asm files into .obj files
+        "-c",
+        "LINK.EXE main.obj blocks.obj ball.obj paddle.obj;" // Link all .obj files to create an executable
+      ],
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      },
+      "problemMatcher": []
+    }
+  ]
 }

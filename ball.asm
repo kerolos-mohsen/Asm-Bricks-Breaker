@@ -104,6 +104,36 @@ MOVE_BALL_BY_VELOCITY PROC
     CMP BALL_Y, AX
     JG  NEG_VEL_Y
 
+    MOV AH, 0Dh        ; GET COLOR OF PIXEL AT BALL POS
+    MOV CX, BALL_X
+    MOV DX, BALL_Y
+
+    DRAW_BALL_LOOP2:
+        INT 10H
+
+        
+        CMP AL, 00h        ; Check If black (no collision)
+        JE EXIT
+
+
+        INC CX
+        ;SI IS TEMP TO COMPARE WITH BALL_Y + BALL_SIZE
+        MOV SI, BALL_X
+        ADD SI, BALL_SIZE
+        CMP CX, SI
+        JNE DRAW_BALL_LOOP2
+
+        INC DX
+        MOV CX, BALL_X
+
+        MOV SI, BALL_Y
+        ADD SI, BALL_SIZE
+
+        CMP DX, SI
+        JNE DRAW_BALL_LOOP2
+
+BOUNCE:
+    NEG BALL_Y_VELOCITY
     RET
 
 NEG_VEL_X:
@@ -112,6 +142,8 @@ NEG_VEL_X:
 
 NEG_VEL_Y:
     NEG BALL_Y_VELOCITY
+    RET
+EXIT:
     RET
 
 MOVE_BALL_BY_VELOCITY ENDP

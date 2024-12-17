@@ -3,7 +3,7 @@
 .model small    
 .data
     paddle_one_x    dw 280    ; X-coordinate for the right-bottom paddle
-    paddle_one_y    dw 190    ; Y-coordinate for the right-bottom paddle
+    paddle_one_y    dw 150    ; Y-coordinate for the right-bottom paddle
     paddle_two_x    dw 10     ; X-coordinate for the left-bottom paddles
     paddle_two_y    dw 190    ; Y-coordinate for the left-bottom paddles
     paddle_width    dw 30     ; Paddle width
