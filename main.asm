@@ -43,10 +43,14 @@ CHECK_TIME:
     call  draw_paddles
     mov  ah , 01h
     int  16h
-    jz   skipMovingPaddles
+    jz   NO_INPUT_ACTION
+
+    CMP   AL, 27                       ; Check if key is ESC
+    JE    exit                         ; If ESC, exit program
+
     call  move_paddles
 
-    skipMovingPaddles:
+    NO_INPUT_ACTION:
     MOV   AH, 2CH
     INT   21H
 
@@ -60,15 +64,6 @@ CHECK_TIME:
     CALL  DELETE_BALL
     CALL  MOVE_BALL_BY_VELOCITY
     CALL  DRAW_BALL
-
-
-
-    mov ah, 6
-	mov dl, 255
-	int 21h       ; get character from keyboard buffer (if any) or set ZF=1. 
-
-    CMP   AL, 27                       ; Check if key is ESC
-    JE    exit                         ; If ESC, exit program
 
     JMP   CHECK_TIME
 
