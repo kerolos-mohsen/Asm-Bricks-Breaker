@@ -47,11 +47,17 @@ draw_height:
     push      cx          ; Save CX (height counter)
     mov       cx, bx      ; Set width counter (20 pixels)
     rep stosb             ; Draw one row of the rectangle
-    mov       cx,320
-    neg       cx
-    add       cx,GAP_SIZE
-    add       cx,GAP_SIZE
-    neg       cx
+    
+    ; Calculation for (320 - GAP_SIZE*2)
+    push AX
+    mov ax,GAP_SIZE
+    mov cx,2
+    mul cl
+    neg AX
+    add ax,320
+    mov cx,ax
+    pop AX
+    
     add       di, cx     ; Move to the next row (320 - GAP_SIZE*2)
     pop       cx          ; Restore CX (height counter)
     loop      draw_height
@@ -63,10 +69,26 @@ draw_height:
     pop  cx              ; Restore CX (rectangle counter)
     loop rectangles_loop
 
-    pop di       ; Restore DI (starting x-coordinate for row)
-    add di, 4800 ; Move DI to next row (320 * HEIGHT_RECT + 320 * 5 (spacing between rows of rect))
+
+    ; Calculate position for next row (320 * RECTANGLE_HEIGHT + 320 * 5)
+    mov ax, 320
+    mov cx, RECTANGLE_HEIGHT  ; Now using the full word
+    mul cx                    ; 16-bit multiply with CX
+    push ax                   ; Save first result
+
+    mov ax, 320
+    mov cx, 5
+    mul cx                    ; 16-bit multiply
+
+    pop bx
+    add ax, bx               ; Add them together
+    pop di                   ; Restore DI (starting x-coordinate for row)
+    add di, ax               ; Move DI to next row
     pop bp       ; Restore BP (row counter)
     dec bp       ; Decrement row counter
+    mov bx, RECTANGLE_WIDTH ; Rectangle width (20 pixels)
+    mov dx, RECTANGLE_HEIGHT ; Rectangle height (10 pixels)
+    mov si, GAP_SIZE ; Spacing between rectangles
     jnz row_loop ; Repeat for next row
 
 	RET
