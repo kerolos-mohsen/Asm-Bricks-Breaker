@@ -10,6 +10,7 @@ CHECK_SCREEN_PIXELS PROC far
     MOV     AX, 0A000h      ; Video memory segment
     MOV     ES, AX          ; ES = A000h
     XOR     DI, DI          ; Start from offset 0
+    MOV     DI, 3200
 
     ; Calculate the total number of pixels to check
     MOV     AX, NUMBER_OF_ROWS ; Load the number of rows

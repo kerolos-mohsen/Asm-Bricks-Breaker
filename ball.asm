@@ -164,14 +164,16 @@ BOUNCE:
 
     POP DX              ; Restore the current Y position
 
-    ; same logic as above but for Y and without the initial gap for y
+    ; same logic as above but for Y
     MOV AX, BLOCK_Y_STEP
     MOV SI, AX
+    SUB DX, 10          ; Subtract 10 for the initial Y position of the blocks (inital gap)
     MOV AX, DX
     XOR DX, DX
     DIV SI
     MUL SI
     MOV DX, AX
+    ADD DX, 10          ; Add 10 to get the actual Y position of the block we want to delete
 
     ; now we have the X and Y position of the block we want to delete
     JMP DELETE_BLOCK
