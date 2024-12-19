@@ -7,8 +7,11 @@
     BALL_Y             DW 00A0H
     BALL_SIZE          DW 04H ; 4x4
 
-    BALL_X_VELOCITY DW 0AH
-    BALL_Y_VELOCITY DW 03H
+    BALL_X_VELOCITY DW 000AH
+    BALL_Y_VELOCITY DW 0003H
+
+    BLOCK_X_STEP    DW 001Eh ; 30 in decimal --> 20 + 10 (RECTANGLE_WIDTH + GAP_SIZE)
+    BLOCK_Y_STEP    DW 000Fh ; 15 in decimal --> 10 + 5 (RECTANGLE_HEIGHT + GAP_SIZE)
 
     WINDOW_HEIGHT DW 200
     WINDOW_WIDTH  DW 320
@@ -17,13 +20,16 @@
     BALL_CENTER_X DW 110
     BALL_CENTER_Y DW 160
 
+    BLOCK_WIDTH DW  20
+    BLOCK_HEIGHT DW  10
+
 .CODE
 
 PUBLIC    DRAW_BALL
 DRAW_BALL PROC
         MOV CX, BALL_X
         MOV DX, BALL_Y
-        MOV AL, 0FH    ; WHITE COLOR
+        MOV AL, 0BH    ; WHITE COLOR
         MOV AH, 0CH
         MOV BH, 0
 
@@ -111,11 +117,12 @@ MOVE_BALL_BY_VELOCITY PROC
     DRAW_BALL_LOOP2:
         INT 10H
 
-        
+        CMP AL,0BH
+        JZ SKIP
         CMP AL, 00h        ; Check If black (no collision)
-        JE EXIT
+        JNE BOUNCE
 
-
+        SKIP:
         INC CX
         ;SI IS TEMP TO COMPARE WITH BALL_Y + BALL_SIZE
         MOV SI, BALL_X
@@ -131,14 +138,43 @@ MOVE_BALL_BY_VELOCITY PROC
 
         CMP DX, SI
         JNE DRAW_BALL_LOOP2
-
-BOUNCE:
-    NEG BALL_Y_VELOCITY
-    RET
+        RET
 
 NEG_VEL_X:
     NEG BALL_X_VELOCITY
     RET
+
+BOUNCE:
+    CMP AL, 0Fh     ; Check If white (collision with paddle)
+    JE NEG_VEL_Y
+
+    ; Saving X, Y, current location
+    push CX
+    push DX
+    push DX
+
+    SUB CX, 15          ; Subtract 15 for the initial X position of the blocks (inital gap) 
+    MOV AX, CX
+    MOV SI, BLOCK_X_STEP
+    XOR DX, DX          ; Clear DX for division
+    DIV SI              ; Divide by 30 (20 + 10) to get the quotient
+    MUL SI              ; Multiply by 30 to get the actual X position of the block without the initial gap
+    MOV CX, AX
+    ADD CX, 15          ; Add 15 to get the actual X position of the block we want to delete
+
+    POP DX              ; Restore the current Y position
+
+    ; same logic as above but for Y and without the initial gap for y
+    MOV AX, BLOCK_Y_STEP
+    MOV SI, AX
+    MOV AX, DX
+    XOR DX, DX
+    DIV SI
+    MUL SI
+    MOV DX, AX
+
+    ; now we have the X and Y position of the block we want to delete
+    JMP DELETE_BLOCK
 
 NEG_VEL_Y:
     NEG BALL_Y_VELOCITY
@@ -146,5 +182,35 @@ NEG_VEL_Y:
 EXIT:
     RET
 
+DELETE_BLOCK:
+        MOV BX, BLOCK_HEIGHT
+    RowLoop:
+        PUSH BX             ; save row counter
+        MOV BX, BLOCK_WIDTH
+        PUSH CX             ; Save starting X position
+    ColumnLoop:
+        MOV AH, 0Ch
+        MOV AL, 0           ; block coulor
+        MOV BH, 0
+        INT 10h             ; Draw the pixel, AL = color, BH = page number, CX = X, DX = Y
+
+        INC CX              ; Move to the next pixel in the row
+        DEC BX              ; width counter
+        JNZ ColumnLoop
+
+        POP CX              ; return X position (starting of the block)
+        INC DX              ; Move to the next row
+        POP BX              ; Restore row counter
+        DEC BX              ; Decrease row counter
+        JNZ RowLoop
+
+        ; Restore ball X, Y location and reverse the Y velocity
+        POP DX
+        POP CX
+
+        NEG BALL_Y_VELOCITY
+        RET
+
 MOVE_BALL_BY_VELOCITY ENDP
+
 END
