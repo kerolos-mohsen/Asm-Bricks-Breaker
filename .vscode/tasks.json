@@ -18,6 +18,8 @@
         "-c",
         "C:", // Switch to the C: drive
         "-c",
+        "DEL main.exe", // Delete the .exe file
+        "-c",
         "TASM.EXE *.asm /m2", // Assemble all .asm files into .obj files
         "-c",
         "LINK.EXE main.obj win.obj winmes.obj blocks.obj ball.obj paddle.obj;", // Link all .obj files to create an executable

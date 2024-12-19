@@ -23,7 +23,7 @@ PUBLIC    DRAW_BALL
 DRAW_BALL PROC
         MOV CX, BALL_X
         MOV DX, BALL_Y
-        MOV AL, 0FH    ; WHITE COLOR
+        MOV AL, 0BH    ; WHITE COLOR
         MOV AH, 0CH
         MOV BH, 0
 
@@ -111,11 +111,12 @@ MOVE_BALL_BY_VELOCITY PROC
     DRAW_BALL_LOOP2:
         INT 10H
 
-        
+        CMP AL,0BH
+        JZ SKIP
         CMP AL, 00h        ; Check If black (no collision)
-        JE EXIT
+        JNE BOUNCE
 
-
+        SKIP:
         INC CX
         ;SI IS TEMP TO COMPARE WITH BALL_Y + BALL_SIZE
         MOV SI, BALL_X
@@ -131,7 +132,7 @@ MOVE_BALL_BY_VELOCITY PROC
 
         CMP DX, SI
         JNE DRAW_BALL_LOOP2
-
+        RET
 BOUNCE:
     NEG BALL_Y_VELOCITY
     RET
