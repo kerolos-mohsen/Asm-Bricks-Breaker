@@ -5,6 +5,38 @@
     AUX_TIME DB 0
 .code
 
+
+EXTRN DRAWBLOCKS:FAR
+EXTRN DRAW_BALL:FAR
+EXTRN MOVE_BALL_BY_VELOCITY:FAR
+EXTRN DELETE_BALL:FAR
+EXTRN move_paddles:FAR
+EXTRN draw_paddles:FAR
+EXTRN CHECK_SCREEN_PIXELS:FAR
+EXTRN DISPLAY_WIN_MESSAGE:FAR
+EXTRN RESET_PADDLES:FAR
+EXTRN DISPLAY_LOOSE_MESSAGE:FAR
+EXTRN DISPLAY_HEARTS:FAR
+EXTRN DELETE_HEARTS:FAR
+EXTRN PLAYER_LIVES:Byte
+
+public TRY_AGAIN
+TRY_AGAIN   PROC    FAR
+    CALL DELETE_HEARTS
+    
+    dec PLAYER_LIVES
+    JZ DISPLAY_LOOSE_MESSAGE_LABEL
+
+    CALL  DISPLAY_HEARTS
+    call RESET_PADDLES
+    RET
+    
+    DISPLAY_LOOSE_MESSAGE_LABEL: 
+    call DISPLAY_LOOSE_MESSAGE
+    jmp exit
+ENDP TRY_AGAIN
+
+
 INIT_APP PROC NEAR
     ; Set video mode 13h (320x200, 256 colors)
                     mov   ax, 0013h                    ; Set video mode 13h
@@ -19,16 +51,8 @@ INIT_APP PROC NEAR
                     rep   stosb                        ; Clear the screen
     
                     RET
-                    ENDP  INIT_APP
+ENDP  INIT_APP
 
-                    EXTRN DRAWBLOCKS:FAR
-                    EXTRN DRAW_BALL:FAR
-                    EXTRN MOVE_BALL_BY_VELOCITY:FAR
-                    EXTRN DELETE_BALL:FAR
-                    EXTRN move_paddles:FAR
-                    EXTRN draw_paddles:FAR
-                    EXTRN CHECK_SCREEN_PIXELS:FAR
-                    EXTRN DISPLAY_WIN_MESSAGE:FAR
 
 main PROC
                     MOV   AX, @DATA
@@ -36,6 +60,7 @@ main PROC
 
                     CALL  INIT_APP
                     CALL  DRAWBLOCKS
+                    CALL  DISPLAY_HEARTS
 
 
     ; GET TIME CH Hours, CL Minutes, DH Seconds, DL Hundreths of a second

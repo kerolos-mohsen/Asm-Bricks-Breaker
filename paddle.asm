@@ -2,16 +2,46 @@
 
 .model small    
 .data
-    paddle_one_x    dw 280    ; X-coordinate for the right-bottom paddle
-    paddle_one_y    dw 150    ; Y-coordinate for the right-bottom paddle
-    paddle_two_x    dw 10     ; X-coordinate for the left-bottom paddles
-    paddle_two_y    dw 190    ; Y-coordinate for the left-bottom paddles
+    paddle_one_x    dw 165    ; X-coordinate for the right-bottom paddle
+    INITIAL_paddle_one_x    dw 165    ; X-coordinate for the right-bottom paddle
+    
+    paddle_one_y    dw 180    ; Y-coordinate for the right-bottom paddle
+    INITIAL_paddle_one_y    dw 180    ; Y-coordinate for the right-bottom paddle
+    
+    paddle_two_x    dw 125     ; X-coordinate for the left-bottom paddles
+    INITIAL_paddle_two_x    dw 125
+    
+    paddle_two_y    dw 180    ; Y-coordinate for the left-bottom paddles
+    INITIAL_paddle_two_y    dw 180
+    
     paddle_width    dw 30     ; Paddle width
     paddle_height   dw 5      ; Paddle height
     paddle_velocity dw 5      ;paddle move speed
 
 .stack 100h
 .code
+PUBLIC RESET_PADDLES
+RESET_PADDLES PROC FAR
+    PUSH cx
+    
+    call clear_paddle1
+    call clear_paddle2
+
+    mov cx,INITIAL_paddle_one_x
+    mov paddle_one_x,cx
+
+    mov cx,INITIAL_paddle_one_y
+    mov paddle_one_y,cx
+
+    mov cx,INITIAL_paddle_two_x
+    mov paddle_two_x,cx
+
+    mov cx,INITIAL_paddle_two_y
+    mov paddle_two_y,cx
+    pop cx
+
+    ret
+RESET_PADDLES ENDP
 
 clear_paddle1 proc far
 
