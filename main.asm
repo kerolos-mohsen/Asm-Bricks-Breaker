@@ -9,6 +9,8 @@
     IS_RECIEVER_FOUND db 0
     public IS_INGAME
     IS_INGAME db 0
+    public CRT_PLAYER
+    CRT_PLAYER db 0
 .code
 
 ;;;;;;;;;		Extrns		;;;;;;;;;
@@ -30,9 +32,13 @@ EXTRN PLAYER_LIVES:Byte
 EXTRN CHECK_SERIAL_MESSAGE:FAR
 EXTRN SEND_SERIAL_CHARACTER:FAR
 EXTRN ENTER_USERNAME:FAR
-EXTRN username:Byte
+EXTRN paddle_one_x:word
+EXTRN paddle_one_y:word
+EXTRN paddle_two_x:word
+EXTRN paddle_two_y:word
 EXTRN MOVE_CURSOR:FAR
-
+EXTRN read_pad_pos:FAR
+EXTRN send_pad_pos:FAR
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MAIN PROC
@@ -69,12 +75,14 @@ MAIN PROC
 
 public START_GAME
 START_GAME PROC FAR
-    CALL  INIT_APP
+    CALL  INIT_GAME
     CALL  DRAWBLOCKS
     CALL  DISPLAY_HEARTS
 
     ; GET TIME CH Hours, CL Minutes, DH Seconds, DL Hundreths of a second
     CHECK_TIME:     
+
+    call read_pad_pos
 
     ; PADDLE STUFF
         call  draw_paddles
@@ -84,8 +92,10 @@ START_GAME PROC FAR
 
         CMP   AL, 27                       ; Check if key is ESC
         JE    exit                         ; If ESC, exit program
-
-        call  move_paddles
+        
+        call move_paddles
+        call  send_pad_pos
+        call  read_pad_pos
 
     NO_INPUT_ACTION:
         MOV   AH, 2CH
@@ -222,7 +232,7 @@ CHECK_KEYBOARD PROC
     JNE NOT_F1
     mov al,5
     mov IS_INGAME,1
-    
+    mov CRT_PLAYER,1
     NOT_F1:
     ; Check for ESC key to exit
     CMP al, 27
@@ -270,7 +280,7 @@ TRY_AGAIN   PROC    FAR
 ENDP TRY_AGAIN
 
 
-INIT_APP PROC NEAR
+INIT_GAME PROC NEAR
     ; Set video mode 13h (320x200, 256 colors)
                     mov   ax, 0013h                    ; Set video mode 13h
                     int   10h                          ; Call BIOS interrupt
@@ -284,7 +294,7 @@ INIT_APP PROC NEAR
                     rep   stosb                        ; Clear the screen
     
                     RET
-ENDP  INIT_APP
+ENDP  INIT_GAME
 
 
 END
