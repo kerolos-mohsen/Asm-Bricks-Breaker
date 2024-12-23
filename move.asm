@@ -24,7 +24,7 @@ MOVE_CURSOR PROC FAR
     push dx
 
 	; Scroll if beyond sender area
-	call ScrollScreenSender
+	jmp ScrollScreenSender
 
 	validateCursor:
 		; Keep cursor in last valid row
@@ -57,6 +57,6 @@ MOVE_CURSOR PROC FAR
 		mov dh, 11               ; Lower-right corner row
 		mov dl, 79               ; Lower-right corner column
 		int 10h
-		ret
+		jmp	validateCursor
 MOVE_CURSOR ENDP
 END

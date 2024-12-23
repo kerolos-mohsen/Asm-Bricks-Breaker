@@ -11,6 +11,7 @@
         "command": "dosbox-x"
       },
       "args": [
+        "-noconsole",
         "-conf",
         "${workspaceFolder}\\p1.conf",
         "-c",
@@ -24,7 +25,7 @@
         "-c",
         "TASM.EXE *.asm /m2", // Assemble all .asm files into .obj files
         "-c",
-        "LINK.EXE main win winmes blocks ball paddle losemes hearts,p1.exe;", // Link all .obj files to create an executable
+        "LINK.EXE main win winmes blocks ball paddle losemes hearts  move poll send username estbconn,p1.exe;", // Link all .obj files to create an executable
         "-c",
         "copy *.obj output.bin", // Combine all .obj files into a single .bin file
         "-c",
@@ -56,6 +57,7 @@
         "command": "dosbox-x"
       },
       "args": [
+        "-noconsole",
         "-conf",
         "${workspaceFolder}\\p2.conf",
         "-c",
@@ -69,7 +71,7 @@
         "-c",
         "TASM.EXE *.asm /m2", // Assemble all .asm files into .obj files
         "-c",
-        "LINK.EXE main.obj win.obj winmes.obj blocks.obj ball.obj paddle.obj losemes.obj hearts.obj,p2.exe;", // Link all .obj files to create an executable
+        "LINK.EXE main win winmes blocks ball paddle losemes hearts  move poll send username estbconn,p2.exe;", // Link all .obj files to create an executable
         "-c",
         "copy *.obj output.bin", // Combine all .obj files into a single .bin file
         "-c",

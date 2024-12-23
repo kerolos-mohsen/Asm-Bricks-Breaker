@@ -5,7 +5,8 @@ receiver_cursor_col db 0
 receiver_cursor_row db 13
 value db ?, "$"
 .code
-
+EXTRN IS_INGAME:byte
+EXTRN START_GAME:FAR
 ; Check for incoming serial messages
 PUBLIC  CHECK_SERIAL_MESSAGE
 CHECK_SERIAL_MESSAGE PROC  FAR
@@ -25,8 +26,16 @@ CHECK_SERIAL_MESSAGE PROC  FAR
     ; Read incoming message
     mov dx, 03f8H
     in al, dx
+    cmp al,0AAH
+    JE SERIAL_MESSAGE_DONE
     mov VALUE, al
     
+    cmp al,5
+    JNE SKIP_START_GAME
+    mov IS_INGAME,1
+    JMP SERIAL_MESSAGE_DONE
+    
+    SKIP_START_GAME:
     ; Display received message
     mov ah, 09
     mov dx, offset value
