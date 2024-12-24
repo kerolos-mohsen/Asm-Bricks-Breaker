@@ -15,8 +15,8 @@
     
     ; Paddle properties
     paddle_width    dw 30     ; Paddle width
-    paddle_height   dw 5      ; Paddle height
-    paddle_velocity dw 3      ; Paddle move speed
+    paddle_height   dw 8      ; Paddle height
+    paddle_velocity dw 4      ; Paddle move speed
 
     ; Screen boundaries
     SCREEN_RIGHT    dw 320    ; Right screen boundary

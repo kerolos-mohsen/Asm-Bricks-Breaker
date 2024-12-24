@@ -2,9 +2,9 @@
 .STACK 100H
 .DATA
     BALL_X_INITIAL_POS DW 160
-    BALL_Y_INITIAL_POS DW 180 ; 130
+    BALL_Y_INITIAL_POS DW 170
     BALL_X             DW 160
-    BALL_Y             DW 180 ; 130
+    BALL_Y             DW 170
     BALL_SIZE          DW 04H ; 4x4
 
     INITIAL_BALL_X_VELOCITY DW 0003H
