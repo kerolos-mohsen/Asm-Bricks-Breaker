@@ -36,8 +36,8 @@
         "DEL *.obj",
         // "-c",
         // "DEL output.bin",
-        // "-c",
-        // "p1",
+        "-c",
+        "p1",
         // "-c",
         // "exit"
       ],
@@ -82,8 +82,8 @@
         "DEL *.obj",
         // "-c",
         // "DEL output.bin",
-        // "-c",
-        // "p2.exe",
+        "-c",
+        "p2.exe",
         // "-c",
         // "exit"
       ],

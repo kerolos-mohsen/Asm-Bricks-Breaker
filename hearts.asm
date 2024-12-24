@@ -5,6 +5,7 @@
     AUX_TIME DB 0
     public PLAYER_LIVES
     PLAYER_LIVES DB 10
+    SPACE_BETWEEN_HEARTS EQU 12
 .code
 public DISPLAY_HEARTS
 DISPLAY_HEARTS PROC FAR
@@ -51,7 +52,7 @@ draw_heart_loop:
     
     pop ax
     pop cx
-    add cx, 12        ; Space between hearts
+    add cx, SPACE_BETWEEN_HEARTS        ; Space between hearts
     dec ah
     jnz draw_heart_loop
     
