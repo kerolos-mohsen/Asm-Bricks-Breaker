@@ -26,8 +26,12 @@
     BLOCK_HEIGHT DW  10
 
 .CODE
-
+EXTRN DisplayScores:FAR
+EXTRN DELETE_SCORE:FAR
+EXTRN CRT_PLAYER:byte
 EXTRN TRY_AGAIN:FAR
+EXTRN P1_SCORE:byte
+EXTRN P2_SCORE:byte
 public  RESET_BALL
 RESET_BALL PROC NEAR
     push CX
@@ -211,6 +215,16 @@ EXIT:
     RET
 
 DELETE_BLOCK:
+        call DELETE_SCORE
+        cmp CRT_PLAYER , 1
+        jne increment_player2
+        inc P1_SCORE
+        jmp skip_player2
+        increment_player2:
+        inc P2_SCORE
+        skip_player2:
+        call DisplayScores
+        ;  Delete the block
         MOV BX, BLOCK_HEIGHT
     RowLoop:
         PUSH BX             ; save row counter

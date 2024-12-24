@@ -15,7 +15,8 @@
 
 ;;;;;;;;;		Extrns		;;;;;;;;;
 
-
+EXTRN DisplayScores:FAR
+EXTRN DELETE_SCORE:FAR
 EXTRN DRAWBLOCKS:FAR
 EXTRN DRAW_BALL:FAR
 EXTRN MOVE_BALL_BY_VELOCITY:FAR
@@ -79,7 +80,7 @@ MAIN PROC
         CALL  INIT_GAME
         CALL  DRAWBLOCKS
         CALL  DISPLAY_HEARTS
-
+        call DisplayScores
         ; GET TIME CH Hours, CL Minutes, DH Seconds, DL Hundreths of a second
         CHECK_TIME:     
 
