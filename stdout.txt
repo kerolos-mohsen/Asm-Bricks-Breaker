@@ -1,7 +1,0 @@
-DOSBox version 0.74-3
-Copyright 2002-2019 DOSBox Team, published under GNU GPL.
----
-CONFIG:Loading primary settings from config file C:\Users\youss\CLionProjects\Asm-Bricks-Breaker\p1\p1.conf
-MIDI:Opened device:win32
-Serial1: Opening COM6
-Serial1: Errors: Framing 0, Parity 0, Overrun RX:1 (IF0:0), TX:0, Break 0
