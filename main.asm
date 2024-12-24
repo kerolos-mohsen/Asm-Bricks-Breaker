@@ -234,6 +234,7 @@ CHECK_FOR_ESC:
     jmp exit
         
 NOT_ESC:
+    CALL SEND_SERIAL_CHARACTER  ; Send before changing local state
     cmp IS_INGAME, 1
     JE KEYBOARD_CHECK_DONE
     CALL MOVE_CURSOR
