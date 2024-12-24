@@ -40,6 +40,8 @@ EXTRN paddle_two_y:word
 EXTRN MOVE_CURSOR:FAR
 EXTRN read_otherPlayer_pad_pos:FAR
 EXTRN send_crtPlayer_pad_pos:FAR
+EXTRN menu:FAR
+EXTRN choice:byte
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MAIN PROC
@@ -50,8 +52,12 @@ MAIN PROC
     ; CALL CLEAR_WINDOW
     ; CALL ENTER_USERNAME
     CALL CLEAR_WINDOW
+    call menu
+    cmp choice , 1
+    jne PLAY
+
     CALL SPLIT_SCREEN
-    
+
     ; Add handshake routine
     ; CALL ESTABLISH_CONNECTION
     
