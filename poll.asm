@@ -31,6 +31,10 @@ CHECK_SERIAL_MESSAGE PROC  FAR
     JE SERIAL_MESSAGE_DONE
     mov VALUE, al
     
+    ; If already ingame then dont do anything
+    cmp IS_INGAME,1
+    je SERIAL_MESSAGE_DONE
+
     cmp al,5
     JNE SKIP_START_GAME
     mov IS_INGAME,1

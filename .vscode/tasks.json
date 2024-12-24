@@ -5,7 +5,7 @@
       "label": "Assemble with Player1 in DOSBox",
       "type": "shell",
       "windows": {
-        "command": "C:\\Program Files (x86)\\DOSBox-0.74-3\\DOSBox.exe"
+        "command": "C:\\DOSBox-X\\dosbox-x.exe"
       },
       "linux": {
         "command": "dosbox-x"
@@ -13,37 +13,37 @@
       "args": [
         "-noconsole",
         "-conf",
-        "${workspaceFolder}\\p1.conf",
+        "${workspaceFolder}\\p1\\p1.conf",
         "-c",
-        "mount C ${cwd}", // Mount current working directory
+        "mount C ${workspaceFolder}",
         "-c",
         "set PATH=%PATH%;C:/8086;",
         "-c",
-        "C:", // Switch to the C: drive
+        "C:",
         "-c",
-        "DEL p1.exe", // Delete the .exe file
+        "cd p1",
         "-c",
-        "TASM.EXE *.asm /m2", // Assemble all .asm files into .obj files
+        "DEL p1.exe",
         "-c",
-        "LINK.EXE main win winmes blocks ball paddle losemes hearts  move poll send username estbconn,p1.exe;", // Link all .obj files to create an executable
+        "TASM.EXE ..\\*.asm /m2",
         "-c",
-        "copy *.obj output.bin", // Combine all .obj files into a single .bin file
+        "LINK.EXE main win winmes blocks ball paddle losemes hearts move poll send username estbconn,p1.exe;",
         "-c",
-        "copy p1.exe output.bin", // Append the .exe file to the .bin file
+        "copy *.obj output.bin",
         "-c",
-        "DEL *.obj", // Delete all .obj files
+        "copy p1.exe output.bin",
         "-c",
-        "DEL output.bin", // Delete the temporary .bin file
+        "DEL *.obj",
+        // "-c",
+        // "DEL output.bin",
         "-c",
-        "p1.exe", // Exit DOSBox
+        "p1",
         "-c",
-        "DEL p1.exe", // Delete the .exe file
-        "-c",
-        "exit" // Exit DOSBox
+        "exit"
       ],
       "group": {
         "kind": "build",
-        "isDefault": true
+        "isDefault": false
       },
       "problemMatcher": []
     },
@@ -51,7 +51,7 @@
       "label": "Assemble with Player2 in DOSBox",
       "type": "shell",
       "windows": {
-        "command": "C:\\Program Files (x86)\\DOSBox-0.74-3\\DOSBox.exe"
+        "command": "C:\\DOSBox-X\\dosbox-x.exe"
       },
       "linux": {
         "command": "dosbox-x"
@@ -59,68 +59,50 @@
       "args": [
         "-noconsole",
         "-conf",
-        "${workspaceFolder}\\p2.conf",
+        "${workspaceFolder}\\p2\\p2.conf",
         "-c",
-        "mount C ${cwd}", // Mount current working directory
+        "mount C ${workspaceFolder}",
         "-c",
         "set PATH=%PATH%;C:/8086;",
         "-c",
-        "C:", // Switch to the C: drive
+        "C:",
         "-c",
-        "DEL p2.exe", // Delete the .exe file
+        "cd p2",
         "-c",
-        "TASM.EXE *.asm /m2", // Assemble all .asm files into .obj files
+        "DEL p2.exe",
         "-c",
-        "LINK.EXE main win winmes blocks ball paddle losemes hearts  move poll send username estbconn,p2.exe;", // Link all .obj files to create an executable
+        "TASM.EXE ..\\*.asm /m2",
         "-c",
-        "copy *.obj output.bin", // Combine all .obj files into a single .bin file
+        "LINK.EXE main win winmes blocks ball paddle losemes hearts move poll send username estbconn,p2.exe;",
         "-c",
-        "copy p2.exe output.bin", // Append the .exe file to the .bin file
+        "copy *.obj output.bin",
         "-c",
-        "DEL *.obj", // Delete all .obj files
+        "copy p2.exe output.bin",
         "-c",
-        "DEL output.bin", // Delete the temporary .bin file
+        "DEL *.obj",
+        // "-c",
+        // "DEL output.bin",
         "-c",
-        "p2.exe", // Exit DOSBox
+        "C:\\p2\\p2.exe",
         "-c",
-        "DEL p2.exe", // Delete the .exe file
-        "-c",
-        "exit" // Exit DOSBox
+        "exit"
       ],
       "group": {
         "kind": "build",
-        "isDefault": true
+        "isDefault": false
       },
       "problemMatcher": []
     },
     {
-      "label": "Try Compiling .asm Files",
-      "type": "shell",
-      "windows": {
-        "command": "C:\\Program Files (x86)\\DOSBox-0.74-3\\DOSBox.exe"
-      },
-      "linux": {
-        "command": "dosbox-x"
-      },
-      "args": [
-        "-c",
-        "mount C ${cwd}", // Mount current working directory
-        "-c",
-        "set PATH=%PATH%;C:/8086",
-        "-c",
-        "C:", // Switch to the C: drive
-        "-c",
-        "DEL main.exe", // Delete the .exe file
-        "-c",
-        "TASM.EXE *.asm /m2", // Assemble all .asm files into .obj files
-        "-c",
-        "LINK.EXE main.obj win.obj winmes.obj blocks.obj ball.obj paddle.obj;" // Link all .obj files to create an executable
+      "label": "Run Both Players",
+      "dependsOn": [
+        "Assemble with Player1 in DOSBox",
+        "Assemble with Player2 in DOSBox"
       ],
       "group": {
-        "kind": "test",
-        "isDefault": false
-      },
-      "problemMatcher": []
+        "kind": "build",
+        "isDefault": true
+      }
     }
   ]
 }

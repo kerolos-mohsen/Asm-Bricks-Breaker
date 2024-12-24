@@ -20,7 +20,7 @@ EXTRN DRAWBLOCKS:FAR
 EXTRN DRAW_BALL:FAR
 EXTRN MOVE_BALL_BY_VELOCITY:FAR
 EXTRN DELETE_BALL:FAR
-EXTRN move_paddles:FAR
+EXTRN move_crtPlayer_paddle:FAR
 EXTRN draw_paddles:FAR
 EXTRN CHECK_SCREEN_PIXELS:FAR
 EXTRN DISPLAY_WIN_MESSAGE:FAR
@@ -37,8 +37,8 @@ EXTRN paddle_one_y:word
 EXTRN paddle_two_x:word
 EXTRN paddle_two_y:word
 EXTRN MOVE_CURSOR:FAR
-EXTRN read_pad_pos:FAR
-EXTRN send_pad_pos:FAR
+EXTRN read_otherPlayer_pad_pos:FAR
+EXTRN send_crtPlayer_pad_pos:FAR
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MAIN PROC
@@ -46,8 +46,8 @@ MAIN PROC
     MOV DS, AX
 
     CALL INIT_SERIAL
-    CALL CLEAR_WINDOW
-    CALL ENTER_USERNAME
+    ; CALL CLEAR_WINDOW
+    ; CALL ENTER_USERNAME
     CALL CLEAR_WINDOW
     CALL SPLIT_SCREEN
     
@@ -56,7 +56,7 @@ MAIN PROC
     
     MAIN_LOOP:
         cmp IS_INGAME,1
-        JE START_GAME
+        JE PLAY
         CALL CHECK_KEYBOARD
         ; Get current cursor position
         mov ah, 03h
@@ -72,63 +72,62 @@ MAIN PROC
         mov ah, 2
         int 10h
     JMP MAIN_LOOP
+    
+    PLAY:
+    public START_GAME
+    START_GAME PROC FAR
+        CALL  INIT_GAME
+        CALL  DRAWBLOCKS
+        CALL  DISPLAY_HEARTS
 
-public START_GAME
-START_GAME PROC FAR
-    CALL  INIT_GAME
-    CALL  DRAWBLOCKS
-    CALL  DISPLAY_HEARTS
+        ; GET TIME CH Hours, CL Minutes, DH Seconds, DL Hundreths of a second
+        CHECK_TIME:     
 
-    ; GET TIME CH Hours, CL Minutes, DH Seconds, DL Hundreths of a second
-    CHECK_TIME:     
+        ; PADDLE STUFF
+            call  draw_paddles
 
-    call read_pad_pos
+            mov   ah , 01h
+            int   16h
+            jz    NO_INPUT_ACTION
 
-    ; PADDLE STUFF
-        call  draw_paddles
-        mov   ah , 01h
-        int   16h
-        jz    NO_INPUT_ACTION
+            CMP   AL, 27                       ; Check if key is ESC
+            JE    exit                         ; If ESC, exit program
 
-        CMP   AL, 27                       ; Check if key is ESC
-        JE    exit                         ; If ESC, exit program
-        
-        call move_paddles
-        call  send_pad_pos
-        call  read_pad_pos
+            call move_crtPlayer_paddle
+        NO_INPUT_ACTION:
+            call  send_crtPlayer_pad_pos
+            call  read_otherPlayer_pad_pos
+            MOV   AH, 2CH
+            INT   21H
 
-    NO_INPUT_ACTION:
-        MOV   AH, 2CH
-        INT   21H
+            CMP   DL, AUX_TIME
+            JE    CHECK_TIME
 
-        CMP   DL, AUX_TIME
-        JE    CHECK_TIME
-
-        MOV   AUX_TIME, DL
+            MOV   AUX_TIME, DL
 
 
-    ; BALL MOVEMENT
-        CALL  DELETE_BALL
-        CALL  MOVE_BALL_BY_VELOCITY
-        CALL  DRAW_BALL
+        ; BALL MOVEMENT
+            CALL  DELETE_BALL
+            CALL  MOVE_BALL_BY_VELOCITY
+            CALL  DRAW_BALL
 
-    ; check win condition
-        call  CHECK_SCREEN_PIXELS
-        cmp   al , 1
-        je    GAME_WON
-        JMP   CHECK_TIME
-    GAME_WON:       
-    call DISPLAY_WIN_MESSAGE
-    exit:           
-    ; Clear screen
-        MOV   AH, 0
-        MOV   AL, 3
-        INT   10H
+        ; check win condition
+            call  CHECK_SCREEN_PIXELS
+            cmp   al , 1
+            je    GAME_WON
+            JMP   CHECK_TIME
+        GAME_WON:       
+        call DISPLAY_WIN_MESSAGE
+        exit:           
+        ; Clear screen
+            MOV   AH, 0
+            MOV   AL, 3
+            INT   10H
 
-    ; Exit program
-        MOV   AH, 4CH
-        INT   21H
-ENDP START_GAME
+        ; Exit program
+            MOV   AH, 4CH
+            INT   21H
+    ENDP START_GAME
 main ENDP
 
 
@@ -163,33 +162,6 @@ INIT_SERIAL PROC NEAR
 	out dx,al
 	RET
 INIT_SERIAL ENDP 
-
-ESTABLISH_CONNECTION PROC FAR
-    ; Send initial handshake byte
-WAIT_FOR_CONNECTION:
-    mov dx, 3FDH      ; Line Status Register
-    in al, dx
-    test al, 00100000b  ; Test if transmitter is ready
-    jz WAIT_FOR_CONNECTION
-    
-    mov dx, 03F8H
-    mov al, 0AAh      ; Handshake byte
-    out dx, al
-    
-    ; Wait for response
-    mov cx, 1000      ; Timeout counter
-WAIT_RESPONSE:
-    mov dx, 3FDH
-    in al, dx
-    test al, 1        ; Test if received data is ready
-    jnz CONNECTED
-    loop WAIT_RESPONSE
-    jmp WAIT_FOR_CONNECTION
-    
-CONNECTED:
-    mov IS_RECIEVER_FOUND, 1
-    RET
-ESTABLISH_CONNECTION ENDP
 
 SPLIT_SCREEN PROC NEAR
 
