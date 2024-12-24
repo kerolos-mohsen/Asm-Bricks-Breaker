@@ -356,11 +356,15 @@ wait_data2:
     ; Update appropriate paddle position
     cmp CRT_PLAYER, 1
     je update_p2    ; If we're player 1, update paddle 2
+    push bx
     call clear_paddle1
+    pop bx
     mov paddle_one_x, bx
     jmp read_done
 update_p2:
+    push bx
     call clear_paddle2
+    pop bx
     mov paddle_two_x, bx
     
 read_done:
