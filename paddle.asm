@@ -3,11 +3,15 @@
     ; Paddle positions
     public paddle_one_x, paddle_one_y
     paddle_one_x    dw 165    ; X-coordinate for right paddle
+    initial_paddle_one_x    dw 165    ; X-coordinate for right paddle
     paddle_one_y    dw 180    ; Y-coordinate for right paddle
+    initial_paddle_one_y    dw 180    ; Y-coordinate for right paddle
     
     public paddle_two_x, paddle_two_y
     paddle_two_x    dw 125    ; X-coordinate for left paddle
+    initial_paddle_two_x    dw 125    ; X-coordinate for left paddle
     paddle_two_y    dw 180    ; Y-coordinate for left paddle
+    initial_paddle_two_y    dw 180    ; Y-coordinate for left paddle
     
     ; Paddle properties
     paddle_width    dw 30     ; Paddle width
@@ -22,6 +26,36 @@
 .code
 
 EXTRN CRT_PLAYER:byte
+
+public RESET_PADDLES
+RESET_PADDLES proc far
+    push cx
+    
+    cmp CRT_PLAYER, 1
+    jne RESET_PLAYER_2
+
+    RESET_PLAYER_1:
+    call clear_paddle1
+    mov cx,initial_paddle_one_x
+    mov paddle_one_x,cx
+    mov cx,initial_paddle_one_y
+    mov paddle_one_y,cx
+    JMP done
+
+    RESET_PLAYER_2:
+    call clear_paddle2
+    mov cx,initial_paddle_two_x
+    mov paddle_two_x,cx
+    mov cx,initial_paddle_two_y
+    mov paddle_two_y,cx
+    call draw_paddles
+    JMP done
+
+    done:
+    call draw_paddles
+    pop cx
+    ret
+RESET_PADDLES endp
 
 PUBLIC clear_paddle1
 clear_paddle1 proc far
@@ -356,12 +390,17 @@ wait_data2:
     ; Update appropriate paddle position
     cmp CRT_PLAYER, 1
     je update_p2    ; If we're player 1, update paddle 2
+    
+    cmp paddle_one_x,bx
+    JE read_done
     push bx
     call clear_paddle1
     pop bx
     mov paddle_one_x, bx
     jmp read_done
 update_p2:
+    cmp paddle_two_x,bx
+    JE read_done
     push bx
     call clear_paddle2
     pop bx
