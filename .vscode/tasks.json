@@ -36,10 +36,10 @@
         "DEL *.obj",
         // "-c",
         // "DEL output.bin",
-        "-c",
-        "p1",
-        "-c",
-        "exit"
+        // "-c",
+        // "p1",
+        // "-c",
+        // "exit"
       ],
       "group": {
         "kind": "build",
@@ -82,10 +82,10 @@
         "DEL *.obj",
         // "-c",
         // "DEL output.bin",
-        "-c",
-        "C:\\p2\\p2.exe",
-        "-c",
-        "exit"
+        // "-c",
+        // "p2.exe",
+        // "-c",
+        // "exit"
       ],
       "group": {
         "kind": "build",
