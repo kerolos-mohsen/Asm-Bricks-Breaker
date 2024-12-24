@@ -9,8 +9,8 @@
 
     INITIAL_BALL_X_VELOCITY DW 0003H
     BALL_X_VELOCITY DW 0003H
-    INITIAL_BALL_Y_VELOCITY DW 0FFFAH
-    BALL_Y_VELOCITY DW 0FFFAH
+    INITIAL_BALL_Y_VELOCITY DW 0FFFAH ;0003H if we want to move it down first
+    BALL_Y_VELOCITY DW 0FFFAH ;0003H if we want to move it down first
 
     BLOCK_X_STEP    DW 001Eh ; 30 in decimal --> 20 + 10 (RECTANGLE_WIDTH + GAP_SIZE)
     BLOCK_Y_STEP    DW 000Fh ; 15 in decimal --> 10 + 5 (RECTANGLE_HEIGHT + GAP_SIZE)
@@ -24,6 +24,8 @@
 
     BLOCK_WIDTH DW  20
     BLOCK_HEIGHT DW  10
+
+    PLAYER_MAKES_COLLISION DB 1
 
 .CODE
 EXTRN DisplayScores:FAR
@@ -173,10 +175,15 @@ MOVE_BALL_BY_VELOCITY PROC
 NEG_VEL_X:
     NEG BALL_X_VELOCITY
     RET
+NEG_VEL_Y:
+    NEG BALL_Y_VELOCITY
+    RET
 
 BOUNCE:
-    CMP AL, 0Fh     ; Check If white (collision with paddle)
-    JE NEG_VEL_Y
+    CMP AL, 0Dh     ; Check If white (collision with paddle)
+    JE BOUNCE_PADDLE1
+    CMP AL, 0Ah     ; Check If white (collision with paddle)
+    JE BOUNCE_PADDLE2
 
     ; Saving X, Y, current location
     push CX
@@ -208,15 +215,22 @@ BOUNCE:
     ; now we have the X and Y position of the block we want to delete
     JMP DELETE_BLOCK
 
-NEG_VEL_Y:
+BOUNCE_PADDLE1:
     NEG BALL_Y_VELOCITY
+    MOV PLAYER_MAKES_COLLISION, 1
     RET
+
+BOUNCE_PADDLE2:
+    NEG BALL_Y_VELOCITY
+    MOV PLAYER_MAKES_COLLISION, 2
+    RET
+
 EXIT:
     RET
 
 DELETE_BLOCK:
         call DELETE_SCORE
-        cmp CRT_PLAYER , 1
+        cmp PLAYER_MAKES_COLLISION , 1
         jne increment_player2
         inc P1_SCORE
         jmp skip_player2

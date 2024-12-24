@@ -257,7 +257,7 @@ draw_paddles proc far
                              mov  dx , paddle_one_y
     paddle1_horizontal:      
                              mov  ah, 0ch                     ; pixel color interrupt
-                             mov  al, 0Fh                     ;pixel color white
+                             mov  al, 0Eh                     ;pixel color white
                              mov  bh,0h
                              int  10h                         ;call interrupt
                              inc  cx                          ; move to left
@@ -279,7 +279,7 @@ draw_paddles proc far
 
     paddle2_horizontal:      
                              mov  ah, 0ch                     ; pixel color interrupt
-                             mov  al, 0Fh                     ;pixel color white
+                             mov  al, 0Ah                     ;pixel color white
                              mov  bh,0h
                              int  10h                         ;call interrupt
                              inc  cx                          ; move to left
