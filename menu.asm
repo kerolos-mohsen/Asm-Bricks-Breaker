@@ -11,17 +11,16 @@
     prompt      db 13,10,'          Your choice [C/P]: $'
     newline     db 13,10,'$'
     public choice
-    choice db 1    ; Variable to store user's choice
+    choice db 0    ; Variable to store user's choice
 
 .code
+
+
+EXTRN CHECK_KEYBOARD:FAR
+EXTRN CLEAR_WINDOW:FAR
+EXTRN CHECK_SERIAL_MESSAGE:FAR
 public menu
 menu proc far
-    
-    ; Clear screen
-    mov ax, 0003h
-    int 10h
-    
-menu_loop:
     ; Print first line
     mov ah, 09h
     lea dx, line
@@ -85,42 +84,11 @@ menu_loop:
     mov ah, 09h
     lea dx, prompt
     int 21h
-    
-    ; Get input
-get_input:
-    mov ah, 01h
-    int 21h
-    
-    ; Convert to uppercase
-    cmp al, 'a'
-    jb check_input
-    cmp al, 'z'
-    ja check_input
-    sub al, 32
-    
-check_input:
-    cmp al, 'C'
-    je chat_selected
-    cmp al, 'P'
-    je game_selected
-    
-    ; If invalid, clear screen and loop
-    mov ax, 0003h
-    int 10h
-    jmp menu_loop
-    
-chat_selected:
-    mov [choice], 1
-    jmp exit_menu
-    
-game_selected:
-    mov [choice], 2
-    
-exit_menu:
-    ; Clear screen before exiting
-    mov ax, 0003h
-    int 10h
-    
+wait_for_input:
+    call CHECK_KEYBOARD        ; Check for local input
+    call CHECK_SERIAL_MESSAGE  ; Check for remote input
+    cmp choice, 0
+    je wait_for_input         ; Keep waiting if no choice made
 ret
 menu endp
 end 

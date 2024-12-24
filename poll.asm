@@ -8,50 +8,54 @@ value db ?, "$"
 EXTRN IS_INGAME:byte
 EXTRN START_GAME:FAR
 EXTRN CRT_PLAYER:byte
+EXTRN choice:byte
+EXTRN CLEAR_WINDOW:FAR
+
 ; Check for incoming serial messages
 PUBLIC  CHECK_SERIAL_MESSAGE
 CHECK_SERIAL_MESSAGE PROC  FAR
-    ; Check Line Status Register
-    mov dx, 3fDH       
+    mov dx, 3fDH      
     in al, dx
     AND al, 1
-    JZ SERIAL_MESSAGE_DONE  ; No message available
+    JNZ MESSAGE_AVAILABLE  ; message available
+    RET
+    MESSAGE_AVAILABLE:
+    mov dx, 03f8H
+    in al, dx
+    cmp al, 0AAH
+    JE SERIAL_MESSAGE_DONE
+    mov VALUE, al
+   
+    cmp IS_INGAME, 1
+    je SERIAL_MESSAGE_DONE
+    
+    cmp al, 5              ; Check for play signal
+    JNE IS_GOING_TO_CHAT
+    mov choice, 2
+    mov IS_INGAME, 1
+    mov CRT_PLAYER, 2
+    JMP SERIAL_MESSAGE_DONE
+    
+IS_GOING_TO_CHAT:
+    cmp al, 6              ; Check for chat signal
+    JNE DISPLAY_MESSAGE
+    mov choice, 1
+    CALL CLEAR_WINDOW
+    JMP SERIAL_MESSAGE_DONE
 
-    ; Move to receiver area using tracked cursor position
-    mov dh, receiver_cursor_row  ; Use tracked row
-    mov dl, receiver_cursor_col  ; Use tracked column
+DISPLAY_MESSAGE:           ; Regular chat message handling
+    mov dh, receiver_cursor_row
+    mov dl, receiver_cursor_col
     mov bh, 0
     mov ah, 2
     int 10h
-
-    ; Read incoming message
-    mov dx, 03f8H
-    in al, dx
-    cmp al,0AAH
-    JE SERIAL_MESSAGE_DONE
-    mov VALUE, al
     
-    ; If already ingame then dont do anything
-    cmp IS_INGAME,1
-    je SERIAL_MESSAGE_DONE
-
-    cmp al,5
-    JNE SKIP_START_GAME
-    mov IS_INGAME,1
-    mov CRT_PLAYER,2
-    JMP SERIAL_MESSAGE_DONE
-    
-    SKIP_START_GAME:
-    ; Display received message
     mov ah, 09
     mov dx, offset value
     int 21h
-    
-    ; Get current cursor position after displaying
+   
     mov ah, 03h
     int 10h
-
-    ; Update tracked cursor position
     mov receiver_cursor_row, dh
     mov receiver_cursor_col, dl
 

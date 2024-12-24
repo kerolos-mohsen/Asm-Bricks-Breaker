@@ -53,8 +53,7 @@ MAIN PROC
     ; CALL ENTER_USERNAME
     CALL CLEAR_WINDOW
     call menu
-    cmp choice , 1
-    jne PLAY
+    CALL CLEAR_WINDOW
 
     CALL SPLIT_SCREEN
 
@@ -62,16 +61,17 @@ MAIN PROC
     ; CALL ESTABLISH_CONNECTION
     
     MAIN_LOOP:
-        cmp IS_INGAME,1
+        cmp IS_INGAME,1 ; or choice is 2
         JE PLAY
-        CALL CHECK_KEYBOARD
+
+        CALL CHECK_KEYBOARD ; Check if going to send something
         ; Get current cursor position
         mov ah, 03h
         int 10h
         mov sender_cursor_row, dh
         mov sender_cursor_col, dl
         
-        CALL CHECK_SERIAL_MESSAGE
+        CALL CHECK_SERIAL_MESSAGE ; Check if there is a message to be recieved
         
         mov dh, sender_cursor_row
         mov dl, sender_cursor_col
@@ -197,48 +197,48 @@ SPLIT_SCREEN PROC NEAR
 	RET
 SPLIT_SCREEN ENDP
 
-CHECK_KEYBOARD PROC
-    ; Check for keystroke without waiting
+PUBLIC CHECK_KEYBOARD
+CHECK_KEYBOARD PROC FAR
     mov ah, 01h
     INT 16h
-    JZ KEYBOARD_CHECK_DONE  ; No key pressed, return
+    JZ KEYBOARD_CHECK_DONE  ; No key pressed
 
-	; Read key from buffer
     mov ah, 0h
     INT 16h
     
-    cmp AH, 59
-    JNE NOT_F1
-    mov al,5
-    mov IS_INGAME,1
-    mov CRT_PLAYER,1
-    NOT_F1:
-    ; Check for ESC key to exit
+    cmp choice, 0
+    jne CHECK_FOR_ESC
+        
+    cmp al, 'p'
+    JNE NOT_P
+    mov al, 5               ; Signal code for play
+    CALL SEND_SERIAL_CHARACTER  ; Send before changing local state
+    mov choice, 2
+    mov IS_INGAME, 1
+    mov CRT_PLAYER, 1
+    jmp NOT_ESC
+    
+NOT_P:
+    cmp al, 'c'
+    JNE NOT_C
+    mov al, 6              ; Signal code for chat
+    CALL SEND_SERIAL_CHARACTER  ; Send before changing local state
+    mov choice, 1
+    CALL CLEAR_WINDOW
+    jmp NOT_ESC            
+    
+NOT_C:
+CHECK_FOR_ESC:
     CMP al, 27
     JNZ NOT_ESC 
     jmp exit
-    
-    NOT_ESC:
-    ; Send character to serial port
-    CALL SEND_SERIAL_CHARACTER
-    cmp IS_INGAME,1
-    JE reciever_found
-    SKIP_START_GAME:
-    ; Move cursor after sending
+        
+NOT_ESC:
+    cmp IS_INGAME, 1
+    JE KEYBOARD_CHECK_DONE
     CALL MOVE_CURSOR
 
 KEYBOARD_CHECK_DONE:
-;     CMP IS_RECIEVER_FOUND, 1
-;     JE reciever_found
-    
-;     ; Small delay to allow character to be received
-;     mov bx, 1000
-;     delay_loop:
-;         dec bx
-;     jnz delay_loop
-    
-;     call SEND_SERIAL_CHARACTER
-reciever_found:
     RET
 CHECK_KEYBOARD ENDP
 
