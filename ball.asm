@@ -264,6 +264,10 @@ DELETE_BLOCK:
         POP DX
         POP CX
 
+        mov ah, 2
+        mov dl, 01h
+        int 21h
+
         NEG BALL_Y_VELOCITY
         RET
 
