@@ -23,6 +23,12 @@ EXTRN DELETE_HEARTS:FAR
 EXTRN PLAYER_LIVES:Byte
 EXTRN RESET_PADDLES:FAR
 EXTRN DISPLAY_LOOSE_MESSAGE:FAR
+EXTRN CLEAR_WINDOW:FAR
+EXTRN SEND_SERIAL_CHARACTER:FAR
+EXTRN SPLIT_SCREEN:FAR
+EXTRN IS_INGAME:Byte
+EXTRN GAME_STATE:Byte
+EXTRN CHECK_SERIAL_MESSAGE:FAR
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -48,46 +54,69 @@ START_GAME PROC FAR
     CALL  INIT_GAME
     CALL  DRAWBLOCKS
     CALL  DISPLAY_HEARTS
-    call DisplayScores
-    
-    ; GET TIME CH Hours, CL Minutes, DH Seconds, DL Hundreths of a second
-    CHECK_TIME:     
-    ; PADDLE STUFF
+    ; call  DisplayScores
+   
+    CHECK_TIME:  
         call  draw_paddles
-
-        mov   ah , 01h
+        mov   ah, 01h             ; check for key press
         int   16h
-        jz    NO_INPUT_ACTION
-
-        CMP   AL, 27                       ; Check if key is ESC
-        JE    exit                         ; If ESC, exit program
-
-        call move_crtPlayer_paddle
+        jz    NO_INPUT_ACTION     ; check for key press
+        
+        ; Read the key that was pressed
+        mov   ah, 00h             ; Get keystroke
+        int   16h
+        
+        CMP   AL, 27             ; Check if key is ESC
+        JE    exit               ; If ESC, exit program
+           
+        cmp   al, 'c'
+        JNE   NOT_C
+        
+        ; Save registers before changing game state
+        push  ax
+        push  dx
+        
+        mov   al, 6              ; Signal code for chat
+        CALL  SEND_SERIAL_CHARACTER  
+        
+        ; Change game state after successful transmission
+        cli                      ; Disable interrupts while changing state
+        mov   GAME_STATE, 1
+        mov   IS_INGAME, 0
+        sti                      ; Re-enable interrupts
+        
+        CALL  CLEAR_WINDOW
+        CALL  SPLIT_SCREEN
+        
+        pop   dx
+        pop   ax
+        jmp   CHECK_TIME         ; Return to main loop instead of IRET
+        
+    NOT_C:
+        call  move_crtPlayer_paddle
+        
     NO_INPUT_ACTION:
+        call  CHECK_SERIAL_MESSAGE  
         call  send_crtPlayer_pad_pos
         call  read_otherPlayer_pad_pos
+       
         MOV   AH, 2CH
         INT   21H
-
         CMP   DL, AUX_TIME
         JE    CHECK_TIME
-
         MOV   AUX_TIME, DL
-
-
-    ; BALL MOVEMENT
+        
         CALL  DELETE_BALL
         CALL  MOVE_BALL_BY_VELOCITY
         CALL  DRAW_BALL
-
-    ; check win condition
         call  CHECK_FOR_WIN
-        
+       
         JMP   CHECK_TIME
-            
+           
     exit:
-    call EXIT_GAME
-ENDP START_GAME
+        call  EXIT_GAME
+        
+START_GAME ENDP
 
 
 

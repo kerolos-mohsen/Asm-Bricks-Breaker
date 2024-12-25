@@ -237,7 +237,7 @@ DELETE_BLOCK:
         increment_player2:
         inc P2_SCORE
         skip_player2:
-        call DisplayScores
+        ; call DisplayScores
         ;  Delete the block
         MOV BX, BLOCK_HEIGHT
     RowLoop:

@@ -40,9 +40,9 @@ MAIN PROC
     call menu
     CALL CLEAR_WINDOW
     CALL SPLIT_SCREEN
-
+    
     MAIN_LOOP:
-        cmp IS_INGAME,1 ; or GAME_STATE is 2
+        cmp GAME_STATE,2 ; or GAME_STATE is 2
         jne NOT_IN_GAME
         CALL START_GAME
         
@@ -77,7 +77,7 @@ MAIN PROC
     EXIT_GAME ENDP
 main ENDP
 
-
+PUBLIC CLEAR_WINDOW
 CLEAR_WINDOW PROC FAR
 	mov al, 03h
 	mov ah, 0
@@ -110,7 +110,6 @@ HANDLE_KEY_PRESS PROC FAR
     mov GAME_STATE, 2
     mov IS_INGAME, 1
     mov CRT_PLAYER, 1
-    CALL START_GAME
     
     CHECK_C_P:
     ; Restore letter to be written on screen

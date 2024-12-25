@@ -6,7 +6,6 @@ receiver_cursor_row db 13
 value db ?, "$"
 .code
 EXTRN IS_INGAME:byte
-EXTRN START_GAME:FAR
 EXTRN CRT_PLAYER:byte
 EXTRN GAME_STATE:byte
 EXTRN CLEAR_WINDOW:FAR
