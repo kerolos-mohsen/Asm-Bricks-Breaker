@@ -2,7 +2,7 @@
 .stack 100h
 
 .DATA
-    AUX_TIME DB 0
+  
     sender_cursor_row db 0
     sender_cursor_col db 0
     public IS_RECIEVER_FOUND
@@ -15,36 +15,16 @@
 
 ;;;;;;;;;		Extrns		;;;;;;;;;
 
-EXTRN DisplayScores:FAR
-EXTRN DELETE_SCORE:FAR
-EXTRN DRAWBLOCKS:FAR
-EXTRN DRAW_BALL:FAR
-EXTRN MOVE_BALL_BY_VELOCITY:FAR
-EXTRN DELETE_BALL:FAR
-EXTRN move_crtPlayer_paddle:FAR
-EXTRN draw_paddles:FAR
-EXTRN CHECK_FOR_WIN:FAR
-EXTRN DISPLAY_WIN_MESSAGE:FAR
-EXTRN RESET_PADDLES:FAR
-EXTRN DISPLAY_LOOSE_MESSAGE:FAR
-EXTRN DISPLAY_HEARTS:FAR
-EXTRN DELETE_HEARTS:FAR
-EXTRN PLAYER_LIVES:Byte
 EXTRN CHECK_SERIAL_MESSAGE:FAR
 EXTRN SEND_SERIAL_CHARACTER:FAR
 EXTRN ENTER_USERNAME:FAR
-EXTRN paddle_one_x:word
-EXTRN paddle_one_y:word
-EXTRN paddle_two_x:word
-EXTRN paddle_two_y:word
 EXTRN MOVE_CURSOR:FAR
-EXTRN read_otherPlayer_pad_pos:FAR
-EXTRN send_crtPlayer_pad_pos:FAR
 EXTRN menu:FAR
 EXTRN choice:byte
 EXTRN INIT_SERIAL:FAR
-EXTRN INIT_GAME:FAR
 EXTRN SPLIT_SCREEN:FAR
+EXTRN START_GAME:FAR
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MAIN PROC
@@ -60,14 +40,11 @@ MAIN PROC
 
     CALL SPLIT_SCREEN
 
-    ; Add handshake routine
-    ; CALL ESTABLISH_CONNECTION
-    
     MAIN_LOOP:
         cmp IS_INGAME,1 ; or choice is 2
-        JE PLAY
+        CALL START_GAME
 
-        CALL CHECK_KEYBOARD ; Check if going to send something
+        CALL HANDLE_KEY_PRESS ; Process any key press
         ; Get current cursor position
         mov ah, 03h
         int 10h
@@ -83,62 +60,18 @@ MAIN PROC
         int 10h
     JMP MAIN_LOOP
     
-    PLAY:
-    public START_GAME
-    START_GAME PROC FAR
-        CALL  INIT_GAME
-        CALL  DRAWBLOCKS
-        CALL  DISPLAY_HEARTS
-        call DisplayScores
-        
-        ; GET TIME CH Hours, CL Minutes, DH Seconds, DL Hundreths of a second
-        CHECK_TIME:     
-        ; PADDLE STUFF
-            call  draw_paddles
 
-            mov   ah , 01h
-            int   16h
-            jz    NO_INPUT_ACTION
+    public  EXIT_GAME
+    EXIT_GAME PROC FAR           
+    ; Clear screen
+        MOV   AH, 0
+        MOV   AL, 3
+        INT   10H
 
-            CMP   AL, 27                       ; Check if key is ESC
-            JE    exit                         ; If ESC, exit program
-
-            call move_crtPlayer_paddle
-        NO_INPUT_ACTION:
-            call  send_crtPlayer_pad_pos
-            call  read_otherPlayer_pad_pos
-            MOV   AH, 2CH
-            INT   21H
-
-            CMP   DL, AUX_TIME
-            JE    CHECK_TIME
-
-            MOV   AUX_TIME, DL
-
-
-        ; BALL MOVEMENT
-            CALL  DELETE_BALL
-            CALL  MOVE_BALL_BY_VELOCITY
-            CALL  DRAW_BALL
-
-        ; check win condition
-            call  CHECK_FOR_WIN
-            
-            JMP   CHECK_TIME
-               
-        exit:
-        public  EXIT_GAME
-        EXIT_GAME PROC FAR           
-        ; Clear screen
-            MOV   AH, 0
-            MOV   AL, 3
-            INT   10H
-
-        ; Exit program
-            MOV   AH, 4CH
-            INT   21H
-        EXIT_GAME ENDP
-    ENDP START_GAME
+    ; Exit program
+        MOV   AH, 4CH
+        INT   21H
+    EXIT_GAME ENDP
 main ENDP
 
 
@@ -150,10 +83,8 @@ CLEAR_WINDOW PROC FAR
 CLEAR_WINDOW ENDP
 
 
-
-
-PUBLIC CHECK_KEYBOARD
-CHECK_KEYBOARD PROC FAR
+PUBLIC HANDLE_KEY_PRESS
+HANDLE_KEY_PRESS PROC FAR
     mov ah, 01h
     INT 16h
     JZ KEYBOARD_CHECK_DONE  ; No key pressed
@@ -192,7 +123,7 @@ NOT_C:
 CHECK_FOR_ESC:
     CMP al, 27
     JNZ NOT_ESC 
-    jmp exit
+    CALL EXIT_GAME
         
 NOT_ESC:
     CALL SEND_SERIAL_CHARACTER  ; Send before changing local state
@@ -202,22 +133,6 @@ NOT_ESC:
 
 KEYBOARD_CHECK_DONE:
     RET
-CHECK_KEYBOARD ENDP
-
-public TRY_AGAIN
-TRY_AGAIN   PROC    FAR
-    CALL DELETE_HEARTS
-    
-    dec PLAYER_LIVES
-    JZ DISPLAY_LOOSE_MESSAGE_LABEL
-
-    CALL  DISPLAY_HEARTS
-    call RESET_PADDLES
-    RET
-    
-    DISPLAY_LOOSE_MESSAGE_LABEL: 
-    call DISPLAY_LOOSE_MESSAGE
-    jmp exit
-ENDP TRY_AGAIN
+HANDLE_KEY_PRESS ENDP
 
 END

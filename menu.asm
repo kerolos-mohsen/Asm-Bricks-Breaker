@@ -16,7 +16,7 @@
 .code
 
 
-EXTRN CHECK_KEYBOARD:FAR
+EXTRN HANDLE_KEY_PRESS:FAR
 EXTRN CLEAR_WINDOW:FAR
 EXTRN CHECK_SERIAL_MESSAGE:FAR
 public menu
@@ -85,7 +85,7 @@ menu proc far
     lea dx, prompt
     int 21h
 wait_for_input:
-    call CHECK_KEYBOARD        ; Check for local input
+    call HANDLE_KEY_PRESS        ; Check for local input
     call CHECK_SERIAL_MESSAGE  ; Check for remote input
     cmp choice, 0
     je wait_for_input         ; Keep waiting if no choice made
