@@ -98,10 +98,12 @@ HANDLE_KEY_PRESS PROC FAR
     mov ah, 0h
     INT 16h
     
-    CMP GAME_STATE, 1
+    ; store al when coming here
+    mov si,ax
+    CMP GAME_STATE, 1 ; chat
     JNE CHECK_C_P
     
-    CMP AH,03Bh
+    CMP AH,03Bh ;compare for F1 scan code
     JNE CHECK_FOR_ESC
     mov al, 5               ; Signal code for play
     CALL SEND_SERIAL_CHARACTER  ; Send before changing local state
@@ -111,6 +113,8 @@ HANDLE_KEY_PRESS PROC FAR
     CALL START_GAME
     
     CHECK_C_P:
+    ; Restore letter to be written on screen
+    mov ax,si
     ; Print Character To Display in blue
     mov ah, 09h
     mov cx, 1
@@ -127,7 +131,7 @@ HANDLE_KEY_PRESS PROC FAR
     mov GAME_STATE, 2
     mov IS_INGAME, 1
     mov CRT_PLAYER, 1
-    jmp NOT_ESC
+    RET
     
 NOT_P:
     cmp al, 'c'
@@ -136,7 +140,7 @@ NOT_P:
     CALL SEND_SERIAL_CHARACTER  ; Send before changing local state
     mov GAME_STATE, 1
     CALL CLEAR_WINDOW
-    jmp NOT_ESC            
+    RET            
     
 NOT_C:
 CHECK_FOR_ESC:
@@ -145,6 +149,11 @@ CHECK_FOR_ESC:
     CALL EXIT_GAME
         
 NOT_ESC:
+    ; Print Character To Display in blue
+    mov ah, 09h
+    mov cx, 1
+    mov bx, 00001001b
+    int 10h
     CALL SEND_SERIAL_CHARACTER  ; Send before changing local state
     cmp IS_INGAME, 1
     JE KEYBOARD_CHECK_DONE
