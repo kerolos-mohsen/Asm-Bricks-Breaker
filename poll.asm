@@ -23,7 +23,9 @@ CHECK_SERIAL_MESSAGE PROC  FAR
     mov dx, 03f8H
     in al, dx
     cmp al, 0AAH
-    JE SERIAL_MESSAGE_DONE
+    JNE PASS_MESSAGE
+    ret
+    PASS_MESSAGE:
     mov VALUE, al
    
     cmp IS_INGAME, 1
@@ -44,6 +46,12 @@ IS_GOING_TO_CHAT:
     JMP SERIAL_MESSAGE_DONE
 
 DISPLAY_MESSAGE:           ; Regular chat message handling
+    cmp al,5
+    JNE contine
+    cmp al,6
+    JNE contine ; escape and send the character if al doesnt match 5 or 6
+    ret
+    contine:
     mov dh, receiver_cursor_row
     mov dl, receiver_cursor_col
     mov bh, 0

@@ -7,12 +7,6 @@
 ; Try sending a character
 PUBLIC  SEND_SERIAL_CHARACTER
 SEND_SERIAL_CHARACTER PROC  FAR
-    ; Prepare character display
-    mov ah, 09h
-    mov cx, 1
-    mov bx, 00001001b
-    int 10h
-    
     ; Wait until serial port is ready to transmit
     mov dx, 03F8H
     out dx, al

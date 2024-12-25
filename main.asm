@@ -42,6 +42,8 @@ EXTRN read_otherPlayer_pad_pos:FAR
 EXTRN send_crtPlayer_pad_pos:FAR
 EXTRN menu:FAR
 EXTRN choice:byte
+EXTRN INIT_SERIAL:FAR
+EXTRN INIT_GAME:FAR
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MAIN PROC
@@ -146,29 +148,6 @@ CLEAR_WINDOW PROC NEAR
 CLEAR_WINDOW ENDP
 
 
-INIT_SERIAL PROC NEAR
-	; initinalize COM
-	
-	;Set Divisor Latch Access Bit
-	mov dx,3fbh 			; Line Control Register
-	mov al,10000000b		;Set Divisor Latch Access Bit
-	out dx,al				;Out it
-	;Set LSB byte of the Baud Rate Divisor Latch register.
-	mov dx,3f8h			
-	mov al,0ch			
-	out dx,al
-
-	;Set MSB byte of the Baud Rate Divisor Latch register.
-	mov dx,3f9h
-	mov al,00h
-	out dx,al
-
-	;Set port configuration
-	mov dx,3fbh
-	mov al,00011011b
-	out dx,al
-	RET
-INIT_SERIAL ENDP 
 
 SPLIT_SCREEN PROC NEAR
 
@@ -205,6 +184,12 @@ CHECK_KEYBOARD PROC FAR
 
     mov ah, 0h
     INT 16h
+
+    ; Print Character To Display in blue
+    mov ah, 09h
+    mov cx, 1
+    mov bx, 00001001b
+    int 10h
     
     cmp choice, 0
     jne CHECK_FOR_ESC
@@ -259,22 +244,6 @@ TRY_AGAIN   PROC    FAR
     jmp exit
 ENDP TRY_AGAIN
 
-
-INIT_GAME PROC NEAR
-    ; Set video mode 13h (320x200, 256 colors)
-                    mov   ax, 0013h                    ; Set video mode 13h
-                    int   10h                          ; Call BIOS interrupt
-
-    ; Clear the screen (fill video memory with 0)
-                    mov   ax, 0A000h                   ; Video memory segment address
-                    mov   es, ax                       ; ES = video memory
-                    xor   di, di                       ; Starting offset in video memory
-                    mov   cx, 32000                    ; 320x200 pixels, 1 byte per pixel
-                    mov   al, 00h                      ; Black color (0)
-                    rep   stosb                        ; Clear the screen
-    
-                    RET
-ENDP  INIT_GAME
 
 
 END
