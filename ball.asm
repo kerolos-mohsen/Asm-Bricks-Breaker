@@ -17,7 +17,7 @@
 
     WINDOW_HEIGHT DW 200
     WINDOW_WIDTH  DW 320
-    WINDOW_BOUNDS DW 12   ; To Check Boundaries Early
+    WINDOW_BOUNDS DW 13   ; To Check Boundaries Early
 
     BALL_CENTER_X DW 110
     BALL_CENTER_Y DW 160

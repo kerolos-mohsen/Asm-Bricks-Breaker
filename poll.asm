@@ -8,7 +8,7 @@ value db ?, "$"
 EXTRN IS_INGAME:byte
 EXTRN START_GAME:FAR
 EXTRN CRT_PLAYER:byte
-EXTRN choice:byte
+EXTRN GAME_STATE:byte
 EXTRN CLEAR_WINDOW:FAR
 
 ; Check for incoming serial messages
@@ -33,7 +33,7 @@ CHECK_SERIAL_MESSAGE PROC  FAR
     
     cmp al, 5              ; Check for play signal
     JNE IS_GOING_TO_CHAT
-    mov choice, 2
+    mov GAME_STATE, 2
     mov IS_INGAME, 1
     mov CRT_PLAYER, 2
     JMP SERIAL_MESSAGE_DONE
@@ -41,7 +41,7 @@ CHECK_SERIAL_MESSAGE PROC  FAR
 IS_GOING_TO_CHAT:
     cmp al, 6              ; Check for chat signal
     JNE DISPLAY_MESSAGE
-    mov choice, 1
+    mov GAME_STATE, 1
     CALL CLEAR_WINDOW
     JMP SERIAL_MESSAGE_DONE
 

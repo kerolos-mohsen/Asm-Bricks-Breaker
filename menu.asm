@@ -8,14 +8,12 @@
     box_bottom  db '    +--------------------------------+$'
     option1     db '        Press C to Enter Chat        $'
     option2     db '        Press P to Play Game         $'
-    prompt      db 13,10,'          Your choice [C/P]: $'
+    prompt      db 13,10,'          Your GAME_STATE [C/P]: $'
     newline     db 13,10,'$'
-    public choice
-    choice db 0    ; Variable to store user's choice
 
 .code
 
-
+EXTRN GAME_STATE:byte
 EXTRN HANDLE_KEY_PRESS:FAR
 EXTRN CLEAR_WINDOW:FAR
 EXTRN CHECK_SERIAL_MESSAGE:FAR
@@ -87,8 +85,8 @@ menu proc far
 wait_for_input:
     call HANDLE_KEY_PRESS        ; Check for local input
     call CHECK_SERIAL_MESSAGE  ; Check for remote input
-    cmp choice, 0
-    je wait_for_input         ; Keep waiting if no choice made
+    cmp GAME_STATE, 0
+    je wait_for_input         ; Keep waiting if no GAME_STATE made
 ret
 menu endp
 end 

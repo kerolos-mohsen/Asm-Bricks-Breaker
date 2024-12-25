@@ -11,6 +11,9 @@
     IS_INGAME db 0
     public CRT_PLAYER
     CRT_PLAYER db 0
+    public GAME_STATE
+    GAME_STATE db 0    ; Variable to store user's GAME_STATE
+
 .code
 
 ;;;;;;;;;		Extrns		;;;;;;;;;
@@ -20,7 +23,6 @@ EXTRN SEND_SERIAL_CHARACTER:FAR
 EXTRN ENTER_USERNAME:FAR
 EXTRN MOVE_CURSOR:FAR
 EXTRN menu:FAR
-EXTRN choice:byte
 EXTRN INIT_SERIAL:FAR
 EXTRN SPLIT_SCREEN:FAR
 EXTRN START_GAME:FAR
@@ -37,11 +39,10 @@ MAIN PROC
     CALL CLEAR_WINDOW
     call menu
     CALL CLEAR_WINDOW
-
     CALL SPLIT_SCREEN
 
     MAIN_LOOP:
-        cmp IS_INGAME,1 ; or choice is 2
+        cmp IS_INGAME,1 ; or GAME_STATE is 2
         jne NOT_IN_GAME
         CALL START_GAME
         
@@ -87,27 +88,43 @@ CLEAR_WINDOW ENDP
 
 PUBLIC HANDLE_KEY_PRESS
 HANDLE_KEY_PRESS PROC FAR
+    ; Check if key is pressed
     mov ah, 01h
     INT 16h
-    JZ KEYBOARD_CHECK_DONE  ; No key pressed
-
+    JNZ MESSAGE_AVAILABLE  ; No key pressed
+    ret
+    MESSAGE_AVAILABLE:
+    ; read char from buffer
     mov ah, 0h
     INT 16h
-
+    
+    CMP GAME_STATE, 1
+    JNE CHECK_C_P
+    
+    CMP AH,03Bh
+    JNE CHECK_FOR_ESC
+    mov al, 5               ; Signal code for play
+    CALL SEND_SERIAL_CHARACTER  ; Send before changing local state
+    mov GAME_STATE, 2
+    mov IS_INGAME, 1
+    mov CRT_PLAYER, 1
+    CALL START_GAME
+    
+    CHECK_C_P:
     ; Print Character To Display in blue
     mov ah, 09h
     mov cx, 1
     mov bx, 00001001b
     int 10h
     
-    cmp choice, 0
+    cmp GAME_STATE, 0
     jne CHECK_FOR_ESC
         
     cmp al, 'p'
     JNE NOT_P
     mov al, 5               ; Signal code for play
     CALL SEND_SERIAL_CHARACTER  ; Send before changing local state
-    mov choice, 2
+    mov GAME_STATE, 2
     mov IS_INGAME, 1
     mov CRT_PLAYER, 1
     jmp NOT_ESC
@@ -117,7 +134,7 @@ NOT_P:
     JNE NOT_C
     mov al, 6              ; Signal code for chat
     CALL SEND_SERIAL_CHARACTER  ; Send before changing local state
-    mov choice, 1
+    mov GAME_STATE, 1
     CALL CLEAR_WINDOW
     jmp NOT_ESC            
     
