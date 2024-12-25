@@ -27,7 +27,7 @@
         "-c",
         "TASM.EXE ..\\*.asm /m2",
         "-c",
-        "LINK.EXE main win winmes blocks ball paddle losemes hearts move poll send username estbconn score menu game serial,p1.exe;",
+        "LINK.EXE main win blocks ball paddle loose hearts move poll send username estbconn score menu game chat,p1.exe;",
         "-c",
         "copy *.obj output.bin",
         "-c",
@@ -37,7 +37,7 @@
         // "-c",
         // "DEL output.bin",
         "-c",
-        "p1",
+        "p1"
         // "-c",
         // "exit"
       ],
@@ -73,7 +73,7 @@
         "-c",
         "TASM.EXE ..\\*.asm /m2",
         "-c",
-        "LINK.EXE main win winmes blocks ball paddle losemes hearts move poll send username estbconn score menu game serial,p2.exe;",
+        "LINK.EXE main win  blocks ball paddle loose hearts move poll send username estbconn score menu game chat,p2.exe;",
         "-c",
         "copy *.obj output.bin",
         "-c",
@@ -83,7 +83,7 @@
         // "-c",
         // "DEL output.bin",
         "-c",
-        "p2.exe",
+        "p2.exe"
         // "-c",
         // "exit"
       ],

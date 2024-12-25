@@ -23,7 +23,7 @@ EXTRN MOVE_BALL_BY_VELOCITY:FAR
 EXTRN DELETE_BALL:FAR
 EXTRN move_crtPlayer_paddle:FAR
 EXTRN draw_paddles:FAR
-EXTRN CHECK_SCREEN_PIXELS:FAR
+EXTRN CHECK_FOR_WIN:FAR
 EXTRN DISPLAY_WIN_MESSAGE:FAR
 EXTRN RESET_PADDLES:FAR
 EXTRN DISPLAY_LOOSE_MESSAGE:FAR
@@ -44,6 +44,7 @@ EXTRN menu:FAR
 EXTRN choice:byte
 EXTRN INIT_SERIAL:FAR
 EXTRN INIT_GAME:FAR
+EXTRN SPLIT_SCREEN:FAR
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MAIN PROC
@@ -89,9 +90,9 @@ MAIN PROC
         CALL  DRAWBLOCKS
         CALL  DISPLAY_HEARTS
         call DisplayScores
+        
         ; GET TIME CH Hours, CL Minutes, DH Seconds, DL Hundreths of a second
         CHECK_TIME:     
-
         ; PADDLE STUFF
             call  draw_paddles
 
@@ -121,13 +122,13 @@ MAIN PROC
             CALL  DRAW_BALL
 
         ; check win condition
-            call  CHECK_SCREEN_PIXELS
-            cmp   al , 1
-            je    GAME_WON
+            call  CHECK_FOR_WIN
+            
             JMP   CHECK_TIME
-        GAME_WON:       
-        call DISPLAY_WIN_MESSAGE
-        exit:           
+               
+        exit:
+        public  EXIT_GAME
+        EXIT_GAME PROC FAR           
         ; Clear screen
             MOV   AH, 0
             MOV   AL, 3
@@ -136,11 +137,12 @@ MAIN PROC
         ; Exit program
             MOV   AH, 4CH
             INT   21H
+        EXIT_GAME ENDP
     ENDP START_GAME
 main ENDP
 
 
-CLEAR_WINDOW PROC NEAR
+CLEAR_WINDOW PROC FAR
 	mov al, 03h
 	mov ah, 0
 	int 10h
@@ -149,32 +151,6 @@ CLEAR_WINDOW ENDP
 
 
 
-SPLIT_SCREEN PROC NEAR
-
-	; Move cursor to CX=0, DX= 13
-	mov dh, 12 ; Row
-	mov dl, 0 ; Col
-	mov bh, 0
-	mov ah, 2
-	int 10h
-	
-	 
-	; horizontal line drawing
-	mov bx, 00007h    ;
-	mov al, 196    ; ASCII character for thin horizontal line (-)
-	mov cx, 80      ; Number of times to write (thinner line)
-	mov AH , 09h
-	int 10h        ; Draw each character
-	
-
-	; Return cursor back to CX=0, DX= 00
-	mov dh, 0 ; Row
-	mov dl, 0 ; Col
-	mov bh, 0
-	mov ah, 2
-	int 10h
-	RET
-SPLIT_SCREEN ENDP
 
 PUBLIC CHECK_KEYBOARD
 CHECK_KEYBOARD PROC FAR
@@ -243,7 +219,5 @@ TRY_AGAIN   PROC    FAR
     call DISPLAY_LOOSE_MESSAGE
     jmp exit
 ENDP TRY_AGAIN
-
-
 
 END

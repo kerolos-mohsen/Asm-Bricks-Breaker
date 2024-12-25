@@ -29,4 +29,32 @@ WAIT_TILL_SEND PROC
 WAIT_TILL_SEND ENDP
 
 
+PUBLIC SPLIT_SCREEN
+SPLIT_SCREEN PROC NEAR
+
+	; Move cursor to CX=0, DX= 13
+	mov dh, 12 ; Row
+	mov dl, 0 ; Col
+	mov bh, 0
+	mov ah, 2
+	int 10h
+	
+	 
+	; horizontal line drawing
+	mov bx, 00007h    ;
+	mov al, 196    ; ASCII character for thin horizontal line (-)
+	mov cx, 80      ; Number of times to write (thinner line)
+	mov AH , 09h
+	int 10h        ; Draw each character
+	
+
+	; Return cursor back to CX=0, DX= 00
+	mov dh, 0 ; Row
+	mov dl, 0 ; Col
+	mov bh, 0
+	mov ah, 2
+	int 10h
+	RET
+SPLIT_SCREEN ENDP
+
 END
