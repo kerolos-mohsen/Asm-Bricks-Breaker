@@ -42,8 +42,10 @@ MAIN PROC
 
     MAIN_LOOP:
         cmp IS_INGAME,1 ; or choice is 2
+        jne NOT_IN_GAME
         CALL START_GAME
-
+        
+        NOT_IN_GAME:
         CALL HANDLE_KEY_PRESS ; Process any key press
         ; Get current cursor position
         mov ah, 03h
